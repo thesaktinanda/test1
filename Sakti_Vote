@@ -1,0 +1,185 @@
+[ec2-user@ip-172-31-5-1 ~]$
+[ec2-user@ip-172-31-5-1 ~]$
+[ec2-user@ip-172-31-5-1 ~]$ ls
+[ec2-user@ip-172-31-5-1 ~]$ cd $home
+[ec2-user@ip-172-31-5-1 ~]$ git clone https://github.com/ashishrpandey/example-voting-app
+Cloning into 'example-voting-app'...
+remote: Enumerating objects: 494, done.
+remote: Total 494 (delta 0), reused 0 (delta 0), pack-reused 494
+Receiving objects: 100% (494/494), 236.17 KiB | 6.38 MiB/s, done.
+Resolving deltas: 100% (179/179), done.
+[ec2-user@ip-172-31-5-1 ~]$ ls
+example-voting-app
+[ec2-user@ip-172-31-5-1 ~]$ cd example-voting-app/k8s-specifications/
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ ls
+db-deployment.yaml  redis-deployment.yaml  result-deployment.yaml  vote-deployment.yaml  worker-deployment.yaml
+db-service.yaml     redis-service.yaml     result-service.yaml     vote-service.yaml
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ vi vote-service.yaml
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ vi result-service.yaml
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl apply -f .
+deployment.apps/db unchanged
+service/db unchanged
+deployment.apps/redis unchanged
+service/redis unchanged
+deployment.apps/result unchanged
+service/result configured
+deployment.apps/vote unchanged
+service/vote configured
+deployment.apps/worker unchanged
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl get all
+NAME                                       READY   STATUS    RESTARTS   AGE
+pod/db-b54cd94f4-s4mp8                     1/1     Running   0          2d7h
+pod/firstapp-firstchart-86bd46c54f-jj87l   1/1     Running   0          5h39m
+pod/redis-868d64d78-vntwt                  1/1     Running   0          2d7h
+pod/result-5d57b59f4b-hpk4p                1/1     Running   0          2d7h
+pod/secondapp-firstchart-6774b8945-584ms   1/1     Running   0          5h21m
+pod/secondapp-mysql-0                      0/1     Pending   0          5h21m
+pod/vote-94849dc97-9gzzn                   1/1     Running   0          2d7h
+pod/worker-dd46d7584-8mrdc                 1/1     Running   0          2d7h
+
+NAME                               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/db                         ClusterIP   10.104.175.246   <none>        5432/TCP         2d7h
+service/firstapp-firstchart        ClusterIP   10.106.65.250    <none>        80/TCP           5h39m
+service/kubernetes                 ClusterIP   10.96.0.1        <none>        443/TCP          2d7h
+service/redis                      ClusterIP   10.109.247.67    <none>        6379/TCP         2d7h
+service/result                     NodePort    10.111.27.144    <none>        5001:31003/TCP   2d7h
+service/secondapp-firstchart       ClusterIP   10.103.44.228    <none>        80/TCP           5h21m
+service/secondapp-mysql            ClusterIP   10.105.244.23    <none>        3306/TCP         5h21m
+service/secondapp-mysql-headless   ClusterIP   None             <none>        3306/TCP         5h21m
+service/vote                       NodePort    10.105.229.55    <none>        5000:31002/TCP   2d7h
+
+NAME                                   READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/db                     1/1     1            1           2d7h
+deployment.apps/firstapp-firstchart    1/1     1            1           5h39m
+deployment.apps/redis                  1/1     1            1           2d7h
+deployment.apps/result                 1/1     1            1           2d7h
+deployment.apps/secondapp-firstchart   1/1     1            1           5h21m
+deployment.apps/vote                   1/1     1            1           2d7h
+deployment.apps/worker                 1/1     1            1           2d7h
+
+NAME                                             DESIRED   CURRENT   READY   AGE
+replicaset.apps/db-b54cd94f4                     1         1         1       2d7h
+replicaset.apps/firstapp-firstchart-86bd46c54f   1         1         1       5h39m
+replicaset.apps/redis-868d64d78                  1         1         1       2d7h
+replicaset.apps/result-5d57b59f4b                1         1         1       2d7h
+replicaset.apps/secondapp-firstchart-6774b8945   1         1         1       5h21m
+replicaset.apps/vote-94849dc97                   1         1         1       2d7h
+replicaset.apps/worker-dd46d7584                 1         1         1       2d7h
+
+NAME                               READY   AGE
+statefulset.apps/secondapp-mysql   0/1     5h21m
+[ec2-user@ip-172-31-5-1 k8s-specifications]$
+
+OBSERVATION:
+I changed the port number for vote service is 31002 and result service is 31003 and voting APP createdsuccessfully ,
+opened both webpages http://13.212.237.177:31002/ and http://13.212.237.177:31003/ and its working fine
+Voting happening and result also showing successfully .
+
+//Deleted vote POD and observed no impact as pod created again.
+
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl delete po vote-94849dc97-9gzzn
+pod "vote-94849dc97-9gzzn" deleted
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl get po -A
+NAMESPACE     NAME                                                                       READY   STATUS    RESTARTS   AGE
+default       db-b54cd94f4-s4mp8                                                         1/1     Running   0          2d7h
+default       firstapp-firstchart-86bd46c54f-jj87l                                       1/1     Running   0          5h53m
+default       redis-868d64d78-vntwt                                                      1/1     Running   0          2d7h
+default       result-5d57b59f4b-hpk4p                                                    1/1     Running   0          2d7h
+default       secondapp-firstchart-6774b8945-584ms                                       1/1     Running   0          5h36m
+default       secondapp-mysql-0                                                          0/1     Pending   0          5h36m
+default       vote-94849dc97-6wpq8                                                       1/1     Running   0          33s
+default       worker-dd46d7584-8mrdc                                                     1/1     Running   0          2d7h
+kube-system   calico-etcd-84p7s                                                          1/1     Running   0          8d
+kube-system   calico-kube-controllers-7997dc8d7b-kmx6j                                   1/1     Running   1          8d
+kube-system   calico-node-4gkw6                                                          2/2     Running   2          8d
+kube-system   calico-node-skbd5                                                          2/2     Running   2          8d
+kube-system   coredns-66bff467f8-lnd8h                                                   1/1     Running   0          8d
+kube-system   coredns-66bff467f8-tz4rt                                                   1/1     Running   0          8d
+kube-system   etcd-ip-172-31-10-185.ap-southeast-1.compute.internal                      1/1     Running   0          8d
+kube-system   kube-apiserver-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+kube-system   kube-controller-manager-ip-172-31-10-185.ap-southeast-1.compute.internal   1/1     Running   0          8d
+kube-system   kube-proxy-85wfn                                                           1/1     Running   0          8d
+
+//Deleted Worker POD and observed no impact as pod created again.
+
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl delete po worker-dd46d7584-8mrdc
+pod "worker-dd46d7584-8mrdc" deleted
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl get po -A
+NAMESPACE     NAME                                                                       READY   STATUS    RESTARTS   AGE
+default       db-b54cd94f4-s4mp8                                                         1/1     Running   0          2d7h
+default       firstapp-firstchart-86bd46c54f-jj87l                                       1/1     Running   0          5h55m
+default       redis-868d64d78-vntwt                                                      1/1     Running   0          2d7h
+default       result-5d57b59f4b-hpk4p                                                    1/1     Running   0          2d7h
+default       secondapp-firstchart-6774b8945-584ms                                       1/1     Running   0          5h38m
+default       secondapp-mysql-0                                                          0/1     Pending   0          5h38m
+default       vote-94849dc97-6wpq8                                                       1/1     Running   0          2m47s
+default       worker-dd46d7584-nv7hq                                                     1/1     Running   0          49s
+kube-system   calico-etcd-84p7s                                                          1/1     Running   0          8d
+kube-system   calico-kube-controllers-7997dc8d7b-kmx6j                                   1/1     Running   1          8d
+kube-system   calico-node-4gkw6                                                          2/2     Running   2          8d
+kube-system   calico-node-skbd5                                                          2/2     Running   2          8d
+kube-system   coredns-66bff467f8-lnd8h                                                   1/1     Running   0          8d
+kube-system   coredns-66bff467f8-tz4rt                                                   1/1     Running   0          8d
+kube-system   etcd-ip-172-31-10-185.ap-southeast-1.compute.internal                      1/1     Running   0          8d
+kube-system   kube-apiserver-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+kube-system   kube-controller-manager-ip-172-31-10-185.ap-southeast-1.compute.internal   1/1     Running   0          8d
+kube-system   kube-proxy-85wfn                                                           1/1     Running   0          8d
+kube-system   kube-proxy-qkmcj                                                           1/1     Running   0          8d
+kube-system   kube-scheduler-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+[ec2-user@ip-172-31-5-1 k8s-specifications]$
+
+//Deleted db POD and observed the result is not updating correctly.  impact as pod created again.
+
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl delete po db-b54cd94f4-s4mp8
+pod "db-b54cd94f4-s4mp8" deleted
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl get po -A
+NAMESPACE     NAME                                                                       READY   STATUS    RESTARTS   AGE
+default       db-b54cd94f4-4r9fn                                                         1/1     Running   0          71s
+default       firstapp-firstchart-86bd46c54f-jj87l                                       1/1     Running   0          5h58m
+default       redis-868d64d78-vntwt                                                      1/1     Running   0          2d7h
+default       result-5d57b59f4b-hpk4p                                                    1/1     Running   0          2d7h
+default       secondapp-firstchart-6774b8945-584ms                                       1/1     Running   0          5h41m
+default       secondapp-mysql-0                                                          0/1     Pending   0          5h41m
+default       vote-94849dc97-6wpq8                                                       1/1     Running   0          5m28s
+default       worker-dd46d7584-nv7hq                                                     1/1     Running   1          3m30s
+kube-system   calico-etcd-84p7s                                                          1/1     Running   0          8d
+kube-system   calico-kube-controllers-7997dc8d7b-kmx6j                                   1/1     Running   1          8d
+kube-system   calico-node-4gkw6                                                          2/2     Running   2          8d
+kube-system   calico-node-skbd5                                                          2/2     Running   2          8d
+kube-system   coredns-66bff467f8-lnd8h                                                   1/1     Running   0          8d
+kube-system   coredns-66bff467f8-tz4rt                                                   1/1     Running   0          8d
+kube-system   etcd-ip-172-31-10-185.ap-southeast-1.compute.internal                      1/1     Running   0          8d
+kube-system   kube-apiserver-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+kube-system   kube-controller-manager-ip-172-31-10-185.ap-southeast-1.compute.internal   1/1     Running   0          8d
+kube-system   kube-proxy-85wfn                                                           1/1     Running   0          8d
+kube-system   kube-proxy-qkmcj                                                           1/1     Running   0          8d
+kube-system   kube-scheduler-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+[ec2-user@ip-172-31-5-1 k8s-specifications]$
+
+// As the result page not respoding, so did restart to result pod and after that results start updating with new voting count
+
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl delete po result-5d57b59f4b-hpk4p
+pod "result-5d57b59f4b-hpk4p" deleted
+[ec2-user@ip-172-31-5-1 k8s-specifications]$ kubectl get po -A
+NAMESPACE     NAME                                                                       READY   STATUS    RESTARTS   AGE
+default       db-b54cd94f4-4r9fn                                                         1/1     Running   0          4m14s
+default       firstapp-firstchart-86bd46c54f-jj87l                                       1/1     Running   0          6h1m
+default       redis-868d64d78-vntwt                                                      1/1     Running   0          2d7h
+default       result-5d57b59f4b-28c5g                                                    1/1     Running   0          69s
+default       secondapp-firstchart-6774b8945-584ms                                       1/1     Running   0          5h44m
+default       secondapp-mysql-0                                                          0/1     Pending   0          5h44m
+default       vote-94849dc97-6wpq8                                                       1/1     Running   0          8m31s
+default       worker-dd46d7584-nv7hq                                                     1/1     Running   1          6m33s
+kube-system   calico-etcd-84p7s                                                          1/1     Running   0          8d
+kube-system   calico-kube-controllers-7997dc8d7b-kmx6j                                   1/1     Running   1          8d
+kube-system   calico-node-4gkw6                                                          2/2     Running   2          8d
+kube-system   calico-node-skbd5                                                          2/2     Running   2          8d
+kube-system   coredns-66bff467f8-lnd8h                                                   1/1     Running   0          8d
+kube-system   coredns-66bff467f8-tz4rt                                                   1/1     Running   0          8d
+kube-system   etcd-ip-172-31-10-185.ap-southeast-1.compute.internal                      1/1     Running   0          8d
+kube-system   kube-apiserver-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+kube-system   kube-controller-manager-ip-172-31-10-185.ap-southeast-1.compute.internal   1/1     Running   0          8d
+kube-system   kube-proxy-85wfn                                                           1/1     Running   0          8d
+kube-system   kube-proxy-qkmcj                                                           1/1     Running   0          8d
+kube-system   kube-scheduler-ip-172-31-10-185.ap-southeast-1.compute.internal            1/1     Running   0          8d
+[ec2-user@ip-172-31-5-1 k8s-specifications]$
